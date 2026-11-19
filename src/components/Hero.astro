@@ -1,0 +1,64 @@
+---
+import { Picture } from 'astro:assets';
+import Icon from './Icon.astro';
+import { site, genres, whatsappLink } from '../data/site';
+import { fundo } from '../lib/images';
+
+const bg = fundo(0);
+---
+
+<section class="grain relative isolate flex min-h-[100svh] items-end overflow-hidden" aria-labelledby="hero-title">
+  {bg && (
+    <Picture
+      src={bg}
+      alt=""
+      formats={['avif', 'webp']}
+      widths={[640, 1024, 1440, 1920, 2400]}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+      class="hero-zoom absolute inset-0 -z-20 size-full object-cover object-center"
+    />
+  )}
+  <div class="absolute inset-0 -z-10 bg-gradient-to-t from-ink via-ink/55 to-ink/30" aria-hidden="true"></div>
+  <div class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,rgba(212,166,74,0.18),transparent_55%)]" aria-hidden="true"></div>
+
+  <div class="mx-auto w-full max-w-7xl px-4 pt-32 pb-16 sm:px-6 md:pb-24 lg:px-8">
+    <p class="eyebrow" data-reveal>Cantor · {site.region}</p>
+
+    <h1 id="hero-title" class="font-display mt-5 text-[clamp(3.5rem,13vw,10rem)] leading-[0.9] font-semibold" data-reveal style="--delay:80ms">
+      Wander<br class="sm:hidden" /> <span class="italic font-normal text-gold">Luiz</span>
+      <span class="sr-only">, cantor para eventos em {site.baseCity} e {site.region}</span>
+    </h1>
+
+    <p class="mt-6 max-w-xl text-lg text-cream/85 md:text-xl" data-reveal style="--delay:160ms">
+      {site.tagline} Música ao vivo para casamentos, aniversários, formaturas e festas em
+      {' '}{site.baseCity} e região.
+    </p>
+
+    <ul class="mt-6 flex max-w-2xl flex-wrap gap-2" aria-label="Estilos musicais" data-reveal style="--delay:220ms">
+      {genres.map((g) => (
+        <li class="rounded-full border border-cream/20 bg-ink/30 px-3 py-1 text-xs font-medium tracking-wide text-cream/85 backdrop-blur-sm">
+          {g}
+        </li>
+      ))}
+    </ul>
+
+    <div class="mt-10 flex flex-col gap-3 sm:flex-row" data-reveal style="--delay:300ms">
+      <a
+        href={whatsappLink()}
+        target="_blank"
+        rel="noopener"
+        class="inline-flex items-center justify-center gap-2 rounded-full bg-gold px-7 py-4 font-semibold text-ink shadow-[0_10px_40px_-10px_rgba(212,166,74,0.6)] transition hover:-translate-y-0.5 hover:bg-gold-soft"
+      >
+        <Icon name="whatsapp" /> Fazer orçamento
+      </a>
+      <a
+        href="#shows"
+        class="inline-flex items-center justify-center gap-2 rounded-full border border-cream/30 px-7 py-4 font-semibold text-cream transition hover:border-gold hover:text-gold"
+      >
+        Ver formatos de show <Icon name="arrow" class="size-4" />
+      </a>
+    </div>
+  </div>
+</section>

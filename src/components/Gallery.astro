@@ -1,0 +1,146 @@
+---
+import { Image, getImage } from 'astro:assets';
+import Icon from './Icon.astro';
+import { site, testimonials } from '../data/site';
+import { fotos } from '../lib/images';
+
+// Versões grandes para a visualização ampliada
+const grandes = await Promise.all(
+  fotos.map((f) => getImage({ src: f.src, width: Math.min(f.src.width, 1800), format: 'webp', quality: 80 })),
+);
+
+// Intercala depoimentos entre as fotos (1 depoimento a cada 3 fotos)
+type Item = { kind: 'foto'; i: number } | { kind: 'dep'; i: number };
+const items: Item[] = [];
+let d = 0;
+fotos.forEach((_, i) => {
+  items.push({ kind: 'foto', i });
+  if ((i + 1) % 3 === 0 && d < testimonials.length) items.push({ kind: 'dep', i: d++ });
+});
+while (d < testimonials.length) items.push({ kind: 'dep', i: d++ });
+
+const alt = (i: number) => `${site.name} ao vivo, foto ${i + 1}`;
+---
+
+<section id="galeria" class="py-24 md:py-32" aria-labelledby="galeria-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl">
+      <p class="eyebrow" data-reveal>Galeria e depoimentos</p>
+      <h2 id="galeria-title" class="font-display mt-4 text-4xl font-semibold md:text-6xl" data-reveal>
+        Momentos que <span class="italic font-normal text-gold">ficam</span>
+      </h2>
+      <p class="mt-6 text-lg text-muted" data-reveal>
+        Shows, casamentos e festas pelo Sudoeste da Bahia, e o que dizem quem já viveu a experiência.
+      </p>
+    </div>
+
+    <ul class="mt-14 columns-1 gap-5 sm:columns-2 lg:columns-3 [&>li]:mb-5 [&>li]:break-inside-avoid">
+      {items.map((it) =>
+        it.kind === 'foto' ? (
+          <li data-reveal>
+            <button
+              type="button"
+              class="gal-item group relative block w-full overflow-hidden rounded-2xl"
+              data-index={it.i}
+              aria-label={`Ampliar foto ${it.i + 1}`}
+            >
+              <Image
+                src={fotos[it.i].src}
+                alt={alt(it.i)}
+                widths={[400, 640, 900]}
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                class="w-full transition duration-700 group-hover:scale-105"
+              />
+              <span class="absolute inset-0 bg-ink/0 transition group-hover:bg-ink/20" aria-hidden="true"></span>
+            </button>
+          </li>
+        ) : (
+          <li data-reveal>
+            <figure class="rounded-2xl border border-line bg-surface p-7 md:p-8">
+              <Icon name="quote" class="size-8 text-gold" />
+              <blockquote class="font-display mt-4 text-xl leading-snug text-cream md:text-[1.35rem]">
+                {testimonials[it.i].quote}
+              </blockquote>
+              <figcaption class="mt-6 border-t border-line pt-4 text-sm">
+                <span class="block font-semibold text-cream">{testimonials[it.i].author}</span>
+                <span class="text-muted">{testimonials[it.i].event}</span>
+              </figcaption>
+            </figure>
+          </li>
+        ),
+      )}
+    </ul>
+  </div>
+
+  <dialog
+    id="lightbox"
+    class="lightbox m-0 size-full max-h-none max-w-none bg-transparent p-0 text-cream"
+    aria-label="Visualização da foto"
+  >
+    <div class="flex size-full items-center justify-center p-4 md:p-12">
+      <img id="lb-img" alt="" class="max-h-full max-w-full rounded-lg object-contain shadow-2xl" />
+    </div>
+    <p id="lb-count" class="absolute top-5 left-5 text-sm text-muted" aria-live="polite"></p>
+    <button type="button" data-lb="close" class="absolute top-3 right-3 flex size-12 items-center justify-center rounded-full bg-surface/80 hover:text-gold" aria-label="Fechar">
+      <Icon name="close" class="size-6" />
+    </button>
+    <button type="button" data-lb="prev" class="absolute top-1/2 left-3 flex size-12 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 hover:text-gold" aria-label="Foto anterior">
+      <Icon name="prev" class="size-6" />
+    </button>
+    <button type="button" data-lb="next" class="absolute top-1/2 right-3 flex size-12 -translate-y-1/2 items-center justify-center rounded-full bg-surface/80 hover:text-gold" aria-label="Próxima foto">
+      <Icon name="next" class="size-6" />
+    </button>
+  </dialog>
+
+  <script
+    is:inline
+    type="application/json"
+    id="gal-data"
+    set:html={JSON.stringify(grandes.map((g, i) => ({ src: g.src, alt: alt(i) })))}
+  />
+</section>
+
+<script>
+  const data: { src: string; alt: string }[] = JSON.parse(document.getElementById('gal-data')?.textContent || '[]');
+  const dlg = document.getElementById('lightbox') as HTMLDialogElement;
+  const img = document.getElementById('lb-img') as HTMLImageElement;
+  const count = document.getElementById('lb-count')!;
+  let cur = 0;
+
+  const show = (i: number) => {
+    cur = (i + data.length) % data.length;
+    img.src = data[cur].src;
+    img.alt = data[cur].alt;
+    count.textContent = `${cur + 1} / ${data.length}`;
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('.gal-item').forEach((b) =>
+    b.addEventListener('click', () => {
+      show(Number(b.dataset.index));
+      dlg.showModal();
+    }),
+  );
+
+  dlg.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const action = t.closest<HTMLElement>('[data-lb]')?.dataset.lb;
+    if (action === 'close' || t === dlg || t === img.parentElement) dlg.close();
+    else if (action === 'prev') show(cur - 1);
+    else if (action === 'next') show(cur + 1);
+  });
+
+  dlg.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') show(cur - 1);
+    if (e.key === 'ArrowRight') show(cur + 1);
+  });
+
+  // Gesto de arrastar no celular
+  let x0: number | null = null;
+  dlg.addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
+  dlg.addEventListener('touchend', (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+</script>

@@ -1,0 +1,48 @@
+---
+import YouTube from './YouTube.astro';
+import Icon from './Icon.astro';
+import { videos, socials } from '../data/site';
+
+const [destaque, ...outros] = videos;
+const youtube = socials.find((s) => s.icon === 'youtube');
+---
+
+<section id="videos" class="relative border-y border-line/60 bg-surface py-24 md:py-32" aria-labelledby="videos-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <div>
+        <p class="eyebrow" data-reveal>Ao vivo</p>
+        <h2 id="videos-title" class="font-display mt-4 text-4xl font-semibold md:text-6xl" data-reveal>
+          Assista e <span class="italic font-normal text-gold">sinta</span> o show
+        </h2>
+      </div>
+      {youtube && (
+        <a
+          href={youtube.url}
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 self-start text-sm font-semibold text-cream/80 transition hover:text-gold md:self-auto"
+          data-reveal
+        >
+          <Icon name="youtube" class="size-5" /> Ver canal no YouTube <Icon name="arrow" class="size-4" />
+        </a>
+      )}
+    </div>
+
+    {destaque && (
+      <div class="mt-12" data-reveal>
+        <YouTube id={destaque.id} title={destaque.title} large />
+      </div>
+    )}
+
+    {outros.length > 0 && (
+      <ul class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {outros.map((v, i) => (
+          <li data-reveal style={`--delay:${i * 80}ms`}>
+            <YouTube id={v.id} title={v.title} />
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</section>

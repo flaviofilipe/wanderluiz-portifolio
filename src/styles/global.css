@@ -1,0 +1,138 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/inter';
+
+@theme {
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-ink: #0e0d0c;
+  --color-surface: #1a1816;
+  --color-surface-2: #24211e;
+  --color-line: #3a352f;
+  --color-cream: #f5f1ea;
+  --color-muted: #b1aa9f;
+  --color-gold: #d4a64a;
+  --color-gold-soft: #e9cc8a;
+  --color-wine: #7a1e2c;
+  --color-whats: #25d366;
+}
+
+:root {
+  color-scheme: dark;
+  interpolate-size: allow-keywords;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-cream);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-gold);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Títulos com a fonte display */
+.font-display {
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+}
+
+/* Rótulo pequeno acima dos títulos */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+.eyebrow::before {
+  content: '';
+  width: 2rem;
+  height: 1px;
+  background: currentColor;
+}
+
+/* Grão sutil sobre fundos fotográficos */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Revelar ao rolar (só quando há JS e sem preferência por movimento reduzido) */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--delay, 0ms);
+  }
+  .js [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-zoom {
+    animation: hero-zoom 18s ease-out both;
+  }
+  @keyframes hero-zoom {
+    from { transform: scale(1.08); }
+    to { transform: scale(1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Cards expansíveis (<details>) com animação suave */
+details.pkg::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    content-visibility 0.45s allow-discrete;
+}
+details.pkg[open]::details-content {
+  block-size: auto;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary { list-style: none; }
+
+details.pkg .pkg-icon { transition: transform 0.35s ease; }
+details.pkg[open] .pkg-icon { transform: rotate(45deg); }
+
+/* Diálogo da galeria */
+dialog.lightbox::backdrop {
+  background: rgb(8 7 6 / 0.94);
+  backdrop-filter: blur(6px);
+}

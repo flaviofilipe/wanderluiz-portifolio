@@ -1,0 +1,28 @@
+---
+import Icon from './Icon.astro';
+import { faq } from '../data/site';
+---
+
+<section id="duvidas" class="py-24 md:py-28" aria-labelledby="faq-title">
+  <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 md:grid-cols-12 lg:px-8">
+    <div class="md:col-span-4" data-reveal>
+      <p class="eyebrow">Dúvidas</p>
+      <h2 id="faq-title" class="font-display mt-4 text-4xl font-semibold md:text-5xl">
+        Perguntas <span class="italic font-normal text-gold">frequentes</span>
+      </h2>
+    </div>
+    <div class="divide-y divide-line border-y border-line md:col-span-8" data-reveal>
+      {faq.map((f) => (
+        <details class="pkg group">
+          <summary class="flex cursor-pointer items-center justify-between gap-6 py-6 text-lg font-medium md:text-xl">
+            <h3>{f.q}</h3>
+            <span class="pkg-icon flex size-9 shrink-0 items-center justify-center rounded-full border border-line text-gold">
+              <Icon name="plus" class="size-4" />
+            </span>
+          </summary>
+          <p class="pb-6 leading-relaxed text-muted">{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

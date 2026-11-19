@@ -1,0 +1,63 @@
+---
+/**
+ * Player leve do YouTube: mostra só a miniatura e carrega o vídeo
+ * apenas ao clicar (economiza ~1 MB por vídeo e melhora o SEO/performance).
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  id: string;
+  title: string;
+  large?: boolean;
+}
+const { id, title, large = false } = Astro.props;
+const thumb = `https://i.ytimg.com/vi/${id}/${large ? 'maxresdefault' : 'hqdefault'}.jpg`;
+const fallback = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+---
+
+<div class="yt group relative aspect-video overflow-hidden rounded-2xl bg-surface ring-1 ring-line" data-yt-id={id} data-yt-title={title}>
+  <img
+    src={thumb}
+    alt=""
+    loading="lazy"
+    decoding="async"
+    width={large ? 1280 : 480}
+    height={large ? 720 : 360}
+    class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
+    onerror={`this.onerror=null;this.src='${fallback}'`}
+  />
+  <div class="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent" aria-hidden="true"></div>
+  <button
+    type="button"
+    class="yt-play absolute inset-0 flex flex-col items-center justify-center gap-4 text-cream"
+    aria-label={`Assistir: ${title}`}
+  >
+    <span
+      class:list={[
+        'flex items-center justify-center rounded-full bg-gold text-ink shadow-2xl transition group-hover:scale-110',
+        large ? 'size-20 md:size-24' : 'size-14',
+      ]}
+    >
+      <Icon name="play" class={large ? 'size-8 md:size-10 translate-x-0.5' : 'size-6 translate-x-0.5'} />
+    </span>
+  </button>
+  <p class:list={['pointer-events-none absolute inset-x-0 bottom-0 p-4 font-medium md:p-6', large ? 'text-lg md:text-2xl font-display' : 'text-sm']}>
+    {title}
+  </p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.yt').forEach((el) => {
+    el.querySelector('.yt-play')?.addEventListener('click', () => {
+      const id = el.dataset.ytId!;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&cc_load_policy=1`;
+      iframe.title = el.dataset.ytTitle || 'Vídeo do YouTube';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      iframe.className = 'absolute inset-0 size-full';
+      el.replaceChildren(iframe);
+      iframe.focus();
+    });
+  });
+</script>

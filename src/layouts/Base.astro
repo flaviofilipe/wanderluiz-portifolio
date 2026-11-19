@@ -1,0 +1,153 @@
+---
+import '../styles/global.css';
+import { site, socials, whatsapp, packages, regions, faq, genres } from '../data/site';
+
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const ogImage = new URL('/og.jpg', site.url).href;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${site.url}/#website`,
+      url: site.url,
+      name: site.name,
+      inLanguage: 'pt-BR',
+    },
+    {
+      '@type': 'Person',
+      '@id': `${site.url}/#person`,
+      name: site.name,
+      url: site.url,
+      image: ogImage,
+      jobTitle: 'Cantor',
+      description: site.description,
+      knowsAbout: genres,
+      sameAs: socials.map((s) => s.url),
+      homeLocation: {
+        '@type': 'Place',
+        name: `${site.baseCity}, Bahia`,
+      },
+    },
+    {
+      '@type': 'EntertainmentBusiness',
+      '@id': `${site.url}/#business`,
+      name: `${site.name} | Cantor para Eventos`,
+      url: site.url,
+      image: ogImage,
+      telephone: `+${whatsapp.number}`,
+      description: site.description,
+      founder: { '@id': `${site.url}/#person` },
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: site.baseCity,
+        addressRegion: 'BA',
+        addressCountry: 'BR',
+      },
+      areaServed: [
+        { '@type': 'AdministrativeArea', name: 'Sudoeste da Bahia' },
+        ...regions.flatMap((r) =>
+          r.cities.map((c) => ({ '@type': 'City', name: `${c}, BA` })),
+        ),
+      ],
+      sameAs: socials.map((s) => s.url),
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: 'Formatos de show',
+        itemListElement: packages.map((p) => ({
+          '@type': 'Offer',
+          url: `${site.url}/#${p.slug}`,
+          itemOffered: {
+            '@type': 'Service',
+            name: `Show ${p.name}`,
+            serviceType: 'Música ao vivo para eventos',
+            description: p.description,
+            provider: { '@id': `${site.url}/#person` },
+          },
+        })),
+      },
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${site.url}/#faq`,
+      mainEntity: faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+};
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{site.title}</title>
+    <meta name="description" content={site.description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content={site.name} />
+    <meta name="theme-color" content="#0e0d0c" />
+    <meta name="geo.region" content="BR-BA" />
+    <meta name="geo.placename" content={site.baseCity} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Open Graph / WhatsApp / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={site.title} />
+    <meta property="og:description" content={site.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name}, cantor no ${site.region}`} />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={site.title} />
+    <meta name="twitter:description" content={site.description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body class="min-h-dvh overflow-x-hidden">
+    <a
+      href="#conteudo"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-full focus:bg-gold focus:px-5 focus:py-3 focus:font-semibold focus:text-ink"
+    >
+      Pular para o conteúdo
+    </a>
+    <slot />
+
+    <script>
+      // Revela elementos ao entrar na tela
+      const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-visible');
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+        );
+        els.forEach((el) => io.observe(el));
+      } else {
+        els.forEach((el) => el.classList.add('is-visible'));
+      }
+    </script>
+  </body>
+</html>

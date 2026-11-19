@@ -1,0 +1,14 @@
+---
+import Icon from './Icon.astro';
+import { whatsappLink } from '../data/site';
+---
+
+<a
+  href={whatsappLink()}
+  target="_blank"
+  rel="noopener"
+  class="fixed right-4 bottom-4 z-40 flex size-14 items-center justify-center rounded-full bg-whats text-ink shadow-[0_10px_30px_-5px_rgba(37,211,102,0.55)] transition hover:scale-105 md:right-6 md:bottom-6 md:size-16"
+  aria-label="Conversar no WhatsApp"
+>
+  <Icon name="whatsapp" class="size-7 md:size-8" />
+</a>

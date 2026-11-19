@@ -1,0 +1,88 @@
+---
+import Icon from './Icon.astro';
+import { regions, allCities, highlightCities, whatsappLink } from '../data/site';
+---
+
+<section id="cidades" class="border-y border-line/60 bg-surface py-16 md:py-20" aria-labelledby="cidades-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 md:grid-cols-12 md:items-center">
+      <div class="md:col-span-5" data-reveal>
+        <p class="eyebrow">Onde atende</p>
+        <h2 id="cidades-title" class="font-display mt-4 text-3xl font-semibold md:text-4xl">
+          Todo o <span class="italic font-normal text-gold">Sudoeste da Bahia</span>
+        </h2>
+      </div>
+      <p class="text-muted md:col-span-7" data-reveal>
+        <Icon name="pin" class="mr-1 inline size-4 -translate-y-0.5 text-gold" />
+        Shows em <strong class="font-semibold text-cream">{highlightCities.join(', ')}</strong> e mais
+        {' '}{allCities.length - highlightCities.length} cidades da região. Outras cidades da Bahia sob consulta.
+      </p>
+    </div>
+
+    <details class="pkg group mt-8 rounded-2xl border border-line bg-ink/40" data-reveal>
+      <summary class="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm font-semibold md:px-6">
+        <span>Ver todas as {allCities.length} cidades atendidas</span>
+        <span class="pkg-icon flex size-8 items-center justify-center rounded-full border border-line text-gold">
+          <Icon name="plus" class="size-4" />
+        </span>
+      </summary>
+      <div class="border-t border-line px-5 pt-5 pb-6 md:px-6">
+        <label class="relative block max-w-sm">
+          <span class="sr-only">Buscar sua cidade</span>
+          <Icon name="search" class="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted" />
+          <input
+            id="city-search"
+            type="search"
+            placeholder="Buscar sua cidade…"
+            autocomplete="off"
+            class="w-full rounded-full border border-line bg-surface py-3 pr-4 pl-11 text-sm text-cream placeholder:text-muted focus:border-gold focus:outline-none"
+          />
+        </label>
+        <p id="city-status" class="mt-3 text-sm text-muted" aria-live="polite"></p>
+
+        <div class="mt-5 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {regions.map((r) => (
+            <div class="city-group">
+              <h3 class="text-xs font-semibold tracking-[0.18em] text-gold uppercase">{r.name}</h3>
+              <ul class="mt-3 space-y-1.5 text-sm text-cream/85">
+                {r.cities.map((c) => <li data-city={c}>{c}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <p class="mt-8 text-sm text-muted">
+          Não encontrou sua cidade?
+          <a href={whatsappLink('Olá, Wander! Vocês atendem na cidade de ___?')} target="_blank" rel="noopener" class="font-semibold text-gold underline underline-offset-4">
+            Pergunte no WhatsApp
+          </a>.
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<script>
+  const input = document.getElementById('city-search') as HTMLInputElement | null;
+  const status = document.getElementById('city-status')!;
+  const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  input?.addEventListener('input', () => {
+    const q = norm(input.value.trim());
+    let found = 0;
+    document.querySelectorAll<HTMLElement>('.city-group').forEach((g) => {
+      let any = false;
+      g.querySelectorAll<HTMLElement>('[data-city]').forEach((li) => {
+        const match = !q || norm(li.dataset.city!).includes(q);
+        li.hidden = !match;
+        if (match) { any = true; found++; }
+      });
+      g.hidden = !any;
+    });
+    status.textContent = !q
+      ? ''
+      : found
+        ? `${found} cidade${found > 1 ? 's' : ''} encontrada${found > 1 ? 's' : ''}.`
+        : 'Cidade não listada. Consulte no WhatsApp, podemos atender!';
+  });
+</script>
